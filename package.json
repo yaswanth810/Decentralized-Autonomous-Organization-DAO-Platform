@@ -1,0 +1,59 @@
+{
+  "name": "dao-governance-platform",
+  "version": "1.0.0",
+  "description": "Full-stack DAO Governance Platform with Solidity smart contracts and React frontend",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "deploy:amoy": "hardhat run scripts/deploy.ts --network polygonAmoy",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:scai": "hardhat run scripts/deploy.ts --network scai",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "verify:amoy": "hardhat run scripts/verify.ts --network polygonAmoy",
+    "verify:sepolia": "hardhat run scripts/verify.ts --network sepolia",
+    "verify:scai": "hardhat run scripts/verify.ts --network scai",
+    "node": "hardhat node",
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "lint": "eslint . --ext .ts,.tsx,.sol",
+    "lint:fix": "eslint . --ext .ts,.tsx,.sol --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,sol,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,sol,json,md}\"",
+    "clean": "hardhat clean && rm -rf cache artifacts typechain-types"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.20",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "chai": "^4.5.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "hardhat": "^2.22.17",
+    "hardhat-gas-reporter": "^1.0.10",
+    "prettier": "^3.4.2",
+    "prettier-plugin-solidity": "^1.4.1",
+    "solidity-coverage": "^0.8.14",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.0.2",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

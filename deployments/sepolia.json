@@ -1,0 +1,11 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "timestamp": "2026-05-20T16:12:59.966Z",
+  "contracts": {
+    "GovernanceToken": "0xd6D587A139b425Fc63F5819eFEF19Eef5442edee",
+    "TimeLock": "0xf86AFdcFC6CD9F1341903B2E25239e627C9e452E",
+    "Treasury": "0xb44013f8D20a6DafDb32DDB83B5a2A82E310697A",
+    "GovernanceDAO": "0xBF86466b1141b0cfF632bEc6750d2cf7781Def20"
+  }
+}

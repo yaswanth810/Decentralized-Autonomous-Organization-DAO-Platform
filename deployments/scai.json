@@ -1,0 +1,11 @@
+{
+  "network": "scai",
+  "chainId": 34,
+  "timestamp": "2026-05-20T16:48:54.951Z",
+  "contracts": {
+    "GovernanceToken": "0x7253c9b6E4f7Fd2B1fb9F0480890E3dE4605b70F",
+    "TimeLock": "0xa757964991729cb41D4fa1fB662d5022b13F524a",
+    "Treasury": "0x1cfC9f1830C6468Bb60B04D4a8F5624311d89fa6",
+    "GovernanceDAO": "0x11DbF393199D168FF57E4f9B9F69D62bC0A9cB94"
+  }
+}

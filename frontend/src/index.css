@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  body {
+    @apply bg-surface text-gray-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-border rounded-full;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface-raised/80 backdrop-blur-xl border border-surface-border
+           rounded-2xl transition-all duration-300;
+  }
+  .glass-card:hover {
+    @apply border-brand-500/30 shadow-lg shadow-brand-500/5;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:from-brand-400 hover:to-brand-500 hover:shadow-lg hover:shadow-brand-500/25
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none;
+  }
+  .btn-secondary {
+    @apply bg-surface-overlay text-gray-300 border border-surface-border font-medium
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:bg-surface-border hover:text-white
+           active:scale-[0.98];
+  }
+  .input-field {
+    @apply w-full bg-surface-overlay border border-surface-border text-gray-100
+           rounded-xl px-4 py-3 outline-none transition-all duration-200
+           placeholder:text-gray-500
+           focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+  }
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
+  }
+  .badge-active {
+    @apply badge bg-brand-500/15 text-brand-400 border border-brand-500/30;
+  }
+  .badge-passed {
+    @apply badge bg-success/15 text-success border border-success/30;
+  }
+  .badge-rejected {
+    @apply badge bg-danger/15 text-danger border border-danger/30;
+  }
+  .badge-executed {
+    @apply badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30;
+  }
+  .skeleton {
+    @apply bg-gradient-to-r from-surface-overlay via-surface-border to-surface-overlay
+           bg-[length:200%_100%] animate-shimmer rounded-lg;
+  }
+}
