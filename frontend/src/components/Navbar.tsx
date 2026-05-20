@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useWeb3 } from "../context/Web3Context";
-import { shortenAddress, getExplorerUrl } from "../config";
+import { shortenAddress } from "../config";
 
 const NAV_LINKS = [
   { to: "/", label: "Proposals" },
@@ -9,7 +9,7 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
-  const { isConnected, walletAddress, chainId, network, connectWallet, disconnectWallet } = useWeb3();
+  const { isConnected, walletAddress, network, connectWallet, disconnectWallet } = useWeb3();
   const location = useLocation();
 
   return (

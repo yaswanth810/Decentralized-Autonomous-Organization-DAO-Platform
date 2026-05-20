@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { ethers, BrowserProvider, JsonRpcSigner, Contract } from "ethers";
 import { GOVERNANCE_TOKEN_ABI, GOVERNANCE_DAO_ABI, TREASURY_ABI, TIMELOCK_ABI } from "../abi";
 import { getNetwork, DEFAULT_CHAIN_ID, type NetworkConfig } from "../config";
