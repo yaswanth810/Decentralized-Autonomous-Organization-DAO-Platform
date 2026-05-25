@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 export default function ProposalDetail() {
   const { id } = useParams<{ id: string }>();
-  const { daoContract, walletAddress, isConnected, chainId } = useWeb3();
+  const { daoContract, walletAddress, isConnected, chainId, votingPower } = useWeb3();
 
   const [proposal, setProposal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -149,16 +149,27 @@ export default function ProposalDetail() {
       {isActive && isConnected && !hasVoted && (
         <div className="glass-card p-6">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Cast Your Vote</h2>
-          <div className="flex gap-4">
-            <button onClick={() => handleVote(true)} disabled={voting}
-              className="flex-1 py-3 rounded-xl font-semibold bg-success/10 border border-success/30 text-success hover:bg-success/20 transition-all disabled:opacity-50" id="vote-yes-btn">
-              {voting ? "Submitting..." : "✓ Vote For"}
-            </button>
-            <button onClick={() => handleVote(false)} disabled={voting}
-              className="flex-1 py-3 rounded-xl font-semibold bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 transition-all disabled:opacity-50" id="vote-no-btn">
-              {voting ? "Submitting..." : "✗ Vote Against"}
-            </button>
-          </div>
+          
+          {Number(votingPower) === 0 ? (
+            <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 text-center">
+              <p className="text-warning font-semibold">You have 0 DAOV tokens</p>
+              <p className="text-sm text-gray-400 mt-1">You need DAOV tokens to vote.</p>
+              <Link to="/faucet" className="inline-block mt-3 px-4 py-2 bg-warning/20 text-warning rounded-lg text-sm font-bold hover:bg-warning/30 transition-colors">
+                Go to Faucet
+              </Link>
+            </div>
+          ) : (
+            <div className="flex gap-4">
+              <button onClick={() => handleVote(true)} disabled={voting}
+                className="flex-1 py-3 rounded-xl font-semibold bg-success/10 border border-success/30 text-success hover:bg-success/20 transition-all disabled:opacity-50" id="vote-yes-btn">
+                {voting ? "Submitting..." : "✓ Vote For"}
+              </button>
+              <button onClick={() => handleVote(false)} disabled={voting}
+                className="flex-1 py-3 rounded-xl font-semibold bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 transition-all disabled:opacity-50" id="vote-no-btn">
+                {voting ? "Submitting..." : "✗ Vote Against"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
