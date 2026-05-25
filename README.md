@@ -39,6 +39,9 @@ The system consists of four core smart contracts working in tandem:
 *   React Hook Form & Zod (Validation)
 *   React Hot Toast (Notifications)
 
+## 📸 Screenshots
+*(Add screenshots of the DAO Platform frontend here to fulfill the submission requirements)*
+
 ## 🌐 Deployed Contracts
 
 ### SecureChain AI (SCAI) Mainnet (Chain ID: 34)
@@ -130,3 +133,26 @@ npm run test:coverage
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+---
+
+## 🎓 Ether Authority Internship Portfolio
+
+This repository serves as the final capstone project for the Ether Authority Web3 Internship. Throughout the program, the following smart contracts and full-stack dApps were successfully developed and deployed:
+
+**Completed Projects:**
+* Hello World
+* Counter (Smart Contract + React App)
+* Storage
+* Ownable
+* Ether Transfer
+* Student Registration
+* Voting Contracts
+* React Apps (Todo, Form, API Fetch)
+* **Full-Stack DAO Governance Platform (This repository)**
+
+**Company Mentions:** 
+@EtherAuthority @SecurechainAI
+
+**Hashtags:**
+#Web3 #Blockchain #Ethereum #ReactJS #SmartContracts #SCAI #Internship #Solidity #SecureChainAI #EtherAuthority

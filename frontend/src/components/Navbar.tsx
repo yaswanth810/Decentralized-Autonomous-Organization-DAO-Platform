@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { to: "/", label: "Proposals" },
   { to: "/create", label: "Create" },
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/faucet", label: "Get DAOV" },
 ];
 
 export default function Navbar() {
@@ -16,14 +17,22 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-surface-border bg-surface/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow">
-              <span className="text-white font-bold text-sm">⟠</span>
+
+          {/* Ether Authority Logo + Name */}
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+            <img
+              src="/ether-authority-logo.svg"
+              alt="Ether Authority"
+              className="h-9 w-auto group-hover:scale-105 transition-transform duration-200"
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="text-[15px] font-extrabold text-[#1a6fd4] tracking-wide">
+                ETHER AUTHORITY
+              </span>
+              <span className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">
+                DAO Platform
+              </span>
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent">
-              DAO Gov
-            </span>
           </Link>
 
           {/* Nav Links */}
@@ -37,16 +46,18 @@ export default function Navbar() {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? "bg-brand-500/15 text-brand-400"
-                      : "text-gray-400 hover:text-gray-200 hover:bg-surface-overlay"
+                      : to === "/faucet"
+                        ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 border border-yellow-500/30 rounded-lg"
+                        : "text-gray-400 hover:text-gray-200 hover:bg-surface-overlay"
                   }`}
                 >
-                  {label}
+                  {to === "/faucet" ? "🪙 Get DAOV" : label}
                 </Link>
               );
             })}
           </div>
 
-          {/* Wallet Button */}
+          {/* Wallet + Network */}
           <div className="flex items-center gap-3">
             {isConnected && network && (
               <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-overlay border border-surface-border text-xs text-gray-400">
@@ -65,7 +76,11 @@ export default function Navbar() {
                 {shortenAddress(walletAddress)}
               </button>
             ) : (
-              <button onClick={connectWallet} className="btn-primary text-sm" id="connect-wallet-button">
+              <button
+                onClick={connectWallet}
+                className="btn-primary text-sm"
+                id="connect-wallet-button"
+              >
                 Connect Wallet
               </button>
             )}

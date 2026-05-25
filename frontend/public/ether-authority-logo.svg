@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80" fill="none">
+  <!-- Ethereum diamond outline -->
+  <polygon points="30,2 58,38 30,52 2,38" stroke="#1a6fd4" stroke-width="3" fill="none"/>
+  <polygon points="30,52 58,38 30,78 2,38" stroke="#1a6fd4" stroke-width="3" fill="none"/>
+  <!-- E letter inside -->
+  <text x="12" y="46" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#1a6fd4">E</text>
+  <!-- Two horizontal lines (like the ETH symbol) -->
+  <line x1="4" y1="34" x2="20" y2="34" stroke="#1a6fd4" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="4" y1="40" x2="20" y2="40" stroke="#1a6fd4" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

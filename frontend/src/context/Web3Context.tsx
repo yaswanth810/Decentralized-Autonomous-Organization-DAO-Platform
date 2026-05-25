@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { ethers, BrowserProvider, JsonRpcSigner, Contract } from "ethers";
 import { GOVERNANCE_TOKEN_ABI, GOVERNANCE_DAO_ABI, TREASURY_ABI, TIMELOCK_ABI } from "../abi";
-import { getNetwork, DEFAULT_CHAIN_ID, type NetworkConfig } from "../config";
+import { getNetwork, DEFAULT_CHAIN_ID, NETWORKS, type NetworkConfig } from "../config";
 import toast from "react-hot-toast";
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -32,6 +32,55 @@ export interface Web3State {
 }
 
 const Web3Context = createContext<Web3State | undefined>(undefined);
+
+// ─── Helper: Switch/Add the correct network ─────────────────────────
+
+async function switchToSupportedNetwork(): Promise<boolean> {
+  if (typeof window.ethereum === "undefined") return false;
+
+  const targetChainId = DEFAULT_CHAIN_ID;
+  const targetNetwork = NETWORKS[targetChainId];
+  if (!targetNetwork) return false;
+
+  const hexChainId = "0x" + targetChainId.toString(16);
+
+  try {
+    // Try switching to the chain
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: hexChainId }],
+    });
+    return true;
+  } catch (switchError: any) {
+    // Chain not added to MetaMask — add it
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: hexChainId,
+              chainName: targetNetwork.name,
+              rpcUrls: [targetNetwork.rpcUrl],
+              blockExplorerUrls: targetNetwork.blockExplorerUrl
+                ? [targetNetwork.blockExplorerUrl]
+                : [],
+              nativeCurrency: {
+                name: "SCAI",
+                symbol: "SCAI",
+                decimals: 18,
+              },
+            },
+          ],
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }
+}
 
 // ─── Provider Component ─────────────────────────────────────────────
 
@@ -81,27 +130,53 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     }
   }, [tokenContract, walletAddress]);
 
-  // ── Connect wallet ──
+  // ── Connect wallet (with auto network switch) ──
   const connectWallet = useCallback(async () => {
     if (typeof window.ethereum === "undefined") {
       toast.error("MetaMask is not installed. Please install it to continue.");
+      window.open("https://metamask.io/download/", "_blank");
       return;
     }
 
     try {
+      // Request accounts first
       const browserProvider = new BrowserProvider(window.ethereum);
-      const accounts: string[] = await browserProvider.send("eth_requestAccounts", []);
-      const userSigner = await browserProvider.getSigner();
-      const net = await browserProvider.getNetwork();
-      const currentChainId = Number(net.chainId);
-      const networkConfig = getNetwork(currentChainId);
+      await browserProvider.send("eth_requestAccounts", []);
 
+      // Check if we're on the right network
+      const net = await browserProvider.getNetwork();
+      let currentChainId = Number(net.chainId);
+      let networkConfig = getNetwork(currentChainId);
+
+      // If on wrong network, auto-switch
       if (!networkConfig) {
-        toast.error(`Unsupported network (Chain ID: ${currentChainId}). Please switch to Polygon Amoy or Sepolia.`);
-        return;
+        toast("Switching to SCAI Mainnet...", { icon: "🔄" });
+        const switched = await switchToSupportedNetwork();
+        if (!switched) {
+          toast.error(
+            `Please manually switch to a supported network (SCAI Mainnet, Sepolia, or Localhost).`,
+          );
+          return;
+        }
+        // Re-initialize provider after switch
+        await new Promise((r) => setTimeout(r, 1000));
+        const freshProvider = new BrowserProvider(window.ethereum);
+        const freshNet = await freshProvider.getNetwork();
+        currentChainId = Number(freshNet.chainId);
+        networkConfig = getNetwork(currentChainId);
+
+        if (!networkConfig) {
+          toast.error("Network switch failed. Please try again.");
+          return;
+        }
       }
 
-      setProvider(browserProvider);
+      // Get fresh provider & signer after potential switch
+      const finalProvider = new BrowserProvider(window.ethereum);
+      const userSigner = await finalProvider.getSigner();
+      const accounts = await finalProvider.send("eth_accounts", []);
+
+      setProvider(finalProvider);
       setSigner(userSigner);
       setWalletAddress(accounts[0]);
       setIsConnected(true);
@@ -112,7 +187,13 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       toast.success(`Connected to ${networkConfig.name}`);
     } catch (err: any) {
       console.error("Wallet connection failed:", err);
-      toast.error(err?.message || "Failed to connect wallet");
+      if (err?.code === 4001) {
+        toast.error("Connection request rejected by user.");
+      } else if (err?.code === -32002) {
+        toast.error("MetaMask is already processing a request. Please open MetaMask and approve.");
+      } else {
+        toast.error(err?.message || "Failed to connect wallet. Please try again.");
+      }
     }
   }, [initContracts]);
 
@@ -141,11 +222,14 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       } else {
         setWalletAddress(accounts[0]);
         toast("Account changed", { icon: "🔄" });
+        // Reconnect to refresh contracts
+        connectWallet();
       }
     };
 
     const handleChainChanged = () => {
-      window.location.reload();
+      // Reconnect on chain change instead of full page reload
+      connectWallet();
     };
 
     window.ethereum.on("accountsChanged", handleAccountsChanged);
@@ -155,7 +239,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       window.ethereum?.removeListener("accountsChanged", handleAccountsChanged);
       window.ethereum?.removeListener("chainChanged", handleChainChanged);
     };
-  }, [disconnectWallet]);
+  }, [disconnectWallet, connectWallet]);
 
   // ── Auto-refresh balance when contracts or address change ──
   useEffect(() => {

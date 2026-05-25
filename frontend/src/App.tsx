@@ -6,6 +6,20 @@ import ProposalList from "./pages/ProposalList";
 import ProposalDetail from "./pages/ProposalDetail";
 import CreateProposal from "./pages/CreateProposal";
 import VotingDashboard from "./pages/VotingDashboard";
+import Faucet from "./pages/Faucet";
+
+function NotFound() {
+  return (
+    <div className="glass-card p-12 text-center animate-fade-in">
+      <div className="text-6xl mb-4">🔍</div>
+      <h2 className="text-2xl font-bold text-white mb-2">Page Not Found</h2>
+      <p className="text-gray-400 mb-6">The page you're looking for doesn't exist.</p>
+      <a href="/" className="btn-primary inline-block">
+        Go to Proposals
+      </a>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -29,6 +43,8 @@ function App() {
           <Route path="/proposal/:id" element={<ProposalDetail />} />
           <Route path="/create" element={<CreateProposal />} />
           <Route path="/dashboard" element={<VotingDashboard />} />
+          <Route path="/faucet" element={<Faucet />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
     </Web3Provider>
