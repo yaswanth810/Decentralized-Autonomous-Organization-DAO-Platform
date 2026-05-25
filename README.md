@@ -36,11 +36,13 @@ The system consists of four core smart contracts working in tandem:
 *   Vite
 *   TailwindCSS & PostCSS
 *   React Router v6
-*   React Hook Form & Zod (Validation)
-*   React Hot Toast (Notifications)
-
 ## 📸 Screenshots
-*(Add screenshots of the DAO Platform frontend here to fulfill the submission requirements)*
+
+### Governance Proposals Dashboard
+![Governance Proposals](assets/proposals.png)
+
+### Create Proposal Interface
+![Create Proposal](assets/create.png)
 
 ## 🌐 Deployed Contracts
 
