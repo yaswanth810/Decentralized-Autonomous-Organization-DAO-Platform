@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useWeb3 } from "../context/Web3Context";
 import { shortenAddress } from "../config";
@@ -12,6 +13,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const { isConnected, walletAddress, network, connectWallet, disconnectWallet } = useWeb3();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <nav className="sticky top-0 z-50 border-b border-surface-border bg-surface/80 backdrop-blur-xl">
@@ -84,8 +86,47 @@ export default function Navbar() {
                 Connect Wallet
               </button>
             )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="sm:hidden p-2 text-gray-400 hover:text-white focus:outline-none"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="sm:hidden py-4 border-t border-surface-border animate-fade-in space-y-2">
+            {NAV_LINKS.map(({ to, label }) => {
+              const isActive = location.pathname === to;
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-brand-500/15 text-brand-400"
+                      : to === "/faucet"
+                        ? "text-yellow-400 hover:bg-yellow-500/10 border border-yellow-500/30"
+                        : "text-gray-400 hover:text-gray-200 hover:bg-surface-overlay"
+                  }`}
+                >
+                  {to === "/faucet" ? "🪙 Get DAOV" : label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </nav>
   );
