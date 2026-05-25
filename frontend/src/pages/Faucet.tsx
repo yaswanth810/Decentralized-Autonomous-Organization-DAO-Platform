@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useWeb3 } from "../context/Web3Context";
 import toast from "react-hot-toast";
@@ -7,6 +7,32 @@ export default function Faucet() {
   const { tokenContract, isConnected, walletAddress, refreshBalance, votingPower } = useWeb3();
   const [claiming, setClaiming] = useState(false);
   const [claimAmount] = useState("500");
+  const [isOwner, setIsOwner] = useState(false);
+  const [hasClaimed, setHasClaimed] = useState(false);
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [transferring, setTransferring] = useState(false);
+
+  // Check if current user is owner and if they have claimed
+  useEffect(() => {
+    async function checkStatus() {
+      if (tokenContract && walletAddress) {
+        try {
+          const owner = await tokenContract.owner();
+          setIsOwner(owner.toLowerCase() === walletAddress.toLowerCase());
+          
+          const claimed = await tokenContract.hasClaimedFaucet(walletAddress);
+          setHasClaimed(claimed);
+        } catch {
+          setIsOwner(false);
+          setHasClaimed(false);
+        }
+      } else {
+        setIsOwner(false);
+        setHasClaimed(false);
+      }
+    }
+    checkStatus();
+  }, [tokenContract, walletAddress]);
 
   const handleClaim = async () => {
     if (!tokenContract || !walletAddress) {
@@ -16,31 +42,50 @@ export default function Faucet() {
 
     setClaiming(true);
     try {
-      // Check if the connected wallet is the token owner (deployer)
-      const owner = await tokenContract.owner();
-      if (owner.toLowerCase() !== walletAddress.toLowerCase()) {
-        toast.error(
-          "Only the token deployer can mint from this faucet. Ask the deployer to send you DAOV tokens.",
-        );
-        setClaiming(false);
-        return;
+      let tx;
+      if (isOwner) {
+        // Owner uses standard mint to mint exactly what they typed
+        const amount = ethers.parseEther(claimAmount);
+        tx = await tokenContract.mint(walletAddress, amount);
+      } else {
+        // Public users use the 1000 DAOV public faucet function
+        tx = await tokenContract.faucetMint();
       }
-
-      const amount = ethers.parseEther(claimAmount);
-      const tx = await tokenContract.mint(walletAddress, amount);
+      
       toast("Minting tokens...", { icon: "⏳" });
       await tx.wait();
       await refreshBalance();
-      toast.success(`${claimAmount} DAOV tokens claimed successfully!`);
+      setHasClaimed(true);
+      toast.success(isOwner ? `${claimAmount} DAOV tokens claimed!` : `1000 DAOV test tokens claimed successfully!`);
     } catch (err: any) {
       console.error("Claim failed:", err);
       if (err?.reason) {
         toast.error(`Claim failed: ${err.reason}`);
       } else {
-        toast.error("Failed to claim tokens. You may not have minting permissions.");
+        toast.error("Failed to claim tokens. Ensure you haven't claimed already.");
       }
     } finally {
       setClaiming(false);
+    }
+  };
+
+  const handleTransfer = async () => {
+    if (!tokenContract || !walletAddress || !recipientAddress) return;
+    
+    setTransferring(true);
+    try {
+      const amount = ethers.parseEther("500");
+      const tx = await tokenContract.transfer(recipientAddress, amount);
+      toast("Transferring 500 DAOV...", { icon: "⏳" });
+      await tx.wait();
+      await refreshBalance();
+      setRecipientAddress("");
+      toast.success("Successfully sent 500 DAOV to reviewer!");
+    } catch (err: any) {
+      console.error("Transfer failed:", err);
+      toast.error("Failed to transfer tokens.");
+    } finally {
+      setTransferring(false);
     }
   };
 
@@ -78,33 +123,70 @@ export default function Faucet() {
           )}
         </div>
 
-        {/* Claim Section */}
+        {/* Claim/Transfer Section */}
         {!isConnected ? (
           <div className="text-center py-4">
             <p className="text-gray-400 text-sm mb-3">Connect your wallet to claim tokens</p>
           </div>
-        ) : (
-          <div className="space-y-4">
+        ) : isOwner ? (
+          <div className="space-y-6">
             <div className="bg-surface-overlay border border-surface-border rounded-xl p-4">
-              <p className="text-gray-400 text-xs mb-2">Amount to Claim</p>
-              <p className="text-3xl font-bold text-brand-400">{claimAmount} DAOV</p>
+              <p className="text-gray-400 text-xs mb-2">Deployer Minting (Admin Only)</p>
+              <div className="flex items-center gap-4">
+                <p className="text-3xl font-bold text-brand-400">{claimAmount} DAOV</p>
+                <button
+                  onClick={handleClaim}
+                  disabled={claiming}
+                  className="btn-primary py-2 px-6 font-bold disabled:opacity-50"
+                >
+                  {claiming ? "Minting..." : "Mint Tokens"}
+                </button>
+              </div>
             </div>
 
-            <button
-              onClick={handleClaim}
-              disabled={claiming}
-              className="w-full btn-primary py-3 text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-              id="claim-tokens-button"
-            >
-              {claiming ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Minting...
-                </span>
-              ) : (
-                "🪙 Claim DAOV Tokens"
-              )}
-            </button>
+            <div className="bg-brand-500/10 border border-brand-500/30 rounded-xl p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-white">Send Tokens to Reviewer</h3>
+              <p className="text-xs text-gray-400">
+                Send 500 DAOV from your deployer balance to the Ether Authority reviewer's address so they can test the dApp.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Reviewer's Wallet Address (0x...)"
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  className="flex-1 bg-surface border border-surface-border rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-brand-500"
+                />
+                <button
+                  onClick={handleTransfer}
+                  disabled={transferring || !recipientAddress}
+                  className="bg-brand-600 hover:bg-brand-500 text-white font-bold py-2 px-4 rounded-lg text-sm disabled:opacity-50 transition-colors"
+                >
+                  {transferring ? "Sending..." : "Send 500 DAOV"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-surface-overlay border border-surface-border rounded-xl p-6 text-center space-y-4">
+            <div className="text-3xl">🎁</div>
+            <h3 className="text-white font-bold">Public Faucet</h3>
+            <p className="text-sm text-gray-400">
+              Claim 1,000 DAOV test tokens to participate in governance proposals. You can only claim this once per wallet.
+            </p>
+            {hasClaimed ? (
+              <div className="p-3 rounded-lg border border-success/30 bg-success/10 text-success text-sm font-bold mt-4">
+                ✓ You have already claimed your 1000 DAOV tokens.
+              </div>
+            ) : (
+              <button
+                onClick={handleClaim}
+                disabled={claiming}
+                className="w-full btn-primary py-3 mt-4 text-base font-bold disabled:opacity-50"
+              >
+                {claiming ? "Claiming..." : "Claim 1,000 DAOV"}
+              </button>
+            )}
           </div>
         )}
 
@@ -112,22 +194,12 @@ export default function Faucet() {
         <div className="bg-brand-500/5 border border-brand-500/20 rounded-xl p-4 space-y-2">
           <h3 className="text-sm font-semibold text-brand-400">How to get DAOV tokens:</h3>
           <ol className="text-xs text-gray-400 space-y-1.5 list-decimal list-inside">
-            <li>Connect your wallet to SCAI Mainnet (auto-prompted)</li>
-            <li>If you're the deployer, click "Claim DAOV Tokens" above</li>
-            <li>Otherwise, ask the DAO deployer to transfer tokens to your address</li>
+            <li>Connect your wallet to SCAI Mainnet</li>
+            <li>Click "Claim 1,000 DAOV" above to get your tokens instantly</li>
             <li>Once you have ≥100 DAOV, you can create governance proposals</li>
           </ol>
         </div>
 
-        {/* Deployer Contact */}
-        <div className="bg-surface-overlay border border-surface-border rounded-xl p-4 text-center">
-          <p className="text-gray-500 text-xs">
-            Need tokens? Contact the DAO deployer to receive DAOV tokens at your connected address.
-          </p>
-          {isConnected && (
-            <p className="text-brand-400 font-mono text-xs mt-2 break-all">{walletAddress}</p>
-          )}
-        </div>
       </div>
     </div>
   );

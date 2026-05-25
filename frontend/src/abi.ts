@@ -10,6 +10,10 @@ export const GOVERNANCE_TOKEN_ABI = [
   "function allowance(address owner, address spender) view returns (uint256)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function transfer(address to, uint256 amount) returns (bool)",
+  "function owner() view returns (address)",
+  "function mint(address to, uint256 amount)",
+  "function faucetMint()",
+  "function hasClaimedFaucet(address user) view returns (bool)",
   "event Transfer(address indexed from, address indexed to, uint256 value)",
 ];
 

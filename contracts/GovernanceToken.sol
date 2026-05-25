@@ -26,6 +26,13 @@ contract GovernanceToken is ERC20, ERC20Permit, Ownable {
 
     /// @notice Maximum supply cap: 10 million DAOV tokens.
     uint256 public constant MAX_SUPPLY = 10_000_000 * 10 ** 18;
+    
+    /// @notice Amount a user can claim from the public faucet
+    uint256 public constant FAUCET_AMOUNT = 1000 * 10 ** 18;
+
+    // ─── State Variables ────────────────────────────────────────────
+    
+    mapping(address => bool) public hasClaimedFaucet;
 
     // ─── Events ─────────────────────────────────────────────────────
 
@@ -44,6 +51,9 @@ contract GovernanceToken is ERC20, ERC20Permit, Ownable {
 
     /// @notice Thrown when minting to the zero address.
     error MintToZeroAddress();
+
+    /// @notice Thrown when user has already claimed from the faucet.
+    error FaucetAlreadyClaimed();
 
     // ─── Constructor ────────────────────────────────────────────────
 
@@ -96,6 +106,21 @@ contract GovernanceToken is ERC20, ERC20Permit, Ownable {
 
         _mint(to, amount);
         emit TokensMinted(to, amount);
+    }
+
+    /**
+     * @notice Allows any user to claim a fixed amount of DAOV tokens once.
+     *         Useful for testing without waiting for deployer distribution.
+     */
+    function faucetMint() external {
+        if (hasClaimedFaucet[msg.sender]) revert FaucetAlreadyClaimed();
+        if (totalSupply() + FAUCET_AMOUNT > MAX_SUPPLY) {
+            revert ExceedsMaxSupply(FAUCET_AMOUNT, MAX_SUPPLY - totalSupply());
+        }
+
+        hasClaimedFaucet[msg.sender] = true;
+        _mint(msg.sender, FAUCET_AMOUNT);
+        emit TokensMinted(msg.sender, FAUCET_AMOUNT);
     }
 
     /**
